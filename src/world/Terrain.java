@@ -2,6 +2,7 @@ package world;
 
 import danogl.collisions.GameObjectCollection;
 import danogl.collisions.Layer;
+import danogl.components.GameObjectPhysics;
 import danogl.gui.rendering.RectangleRenderable;
 import danogl.util.Vector2;
 import pepse.util.ColorSupplier;
@@ -62,11 +63,8 @@ public class Terrain {
     float perlinNoise(int x) {
         float new_x = x/ (windowDimensions.y());
         float perlinFraction =
-//                (float) (((float) (0.03 * Math.cos(Math.E*x)
-//                        +0.4* Math.sin( Math.PI * x))) + 0.7);
                 (float)(
                          0.35 *Math.sin(2.75 *(new_x) + 1) -
-//                        0.180 *Math.sin(2.96 *(0.002*x+4.98)) -
                         0.2 *Math.sin(6.23 *(new_x + 5))+
                         0.15 *Math.cos(15 *(new_x+4.63)) )*
                         windowDimensions.y()/3 + windowDimensions.y()/3*2;
@@ -93,18 +91,17 @@ public class Terrain {
      */
     public void createInRange(int minX, int maxX) {
         var blockImage = new RectangleRenderable(ColorSupplier.approximateColor(BASE_GROUND_COLOR));
-        int nextBlockX = minX;
-        while (nextBlockX < maxX) {
-            int nextBlockY = (int) windowDimensions.y();
+        for (int nextBlockX = minX; nextBlockX < maxX; nextBlockX += Block.SIZE) {
+            int nextBlockY = (int) windowDimensions.y() - Block.SIZE;
             int maxY = (int) groundHeightAt(nextBlockX);
-            while (nextBlockY >= maxY) { // add a brick column at that x coordinate
-                Vector2 placeBlockAt = new Vector2(nextBlockX, nextBlockY);
+            // loop through the blocks in the column from the top to the ground height
+            for (int i = nextBlockY; i >= maxY; i -= Block.SIZE) {
+                // Create a new block image on each iteration of the outer loop
+                Vector2 placeBlockAt = new Vector2(nextBlockX, i);
                 Block curBlock = new Block(placeBlockAt, blockImage);
-                gameObjects.addGameObject(curBlock);
-                nextBlockY -= Block.SIZE;
+                gameObjects.addGameObject(curBlock, groundLayer);
                 curBlock.setTag("ground");
             }
-            nextBlockX += Block.SIZE;
         }
     }
 }

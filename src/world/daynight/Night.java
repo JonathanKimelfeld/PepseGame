@@ -1,4 +1,4 @@
-package pepse.world.daynight;
+package world.daynight;
 
 import danogl.GameObject;
 import danogl.collisions.GameObjectCollection;
